@@ -12,7 +12,6 @@ export class ProductElasticIndex {
 
   async insertProductDocument(product: Product): Promise<any> {
     const data = this.productDocument(product);
-    console.log('data', data);
     return await this.searchService.insertIndex(data);
   }
 
@@ -22,7 +21,7 @@ export class ProductElasticIndex {
     return await this.searchService.insertIndex(data);
   }
 
-  private async deleteProductDocument(prodId: number): Promise<any> {
+  async deleteProductDocument(prodId: number): Promise<any> {
     const data = {
       index: productIndex._index,
       id: prodId.toString(),

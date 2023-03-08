@@ -3,7 +3,7 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { SearchServiceInterface } from './interface/search.service.interface';
 import { ConfigSearch } from './config/search.config';
 
-const { ELASTIC_CLOUD_ID, ELASTIC_USER, ELASTIC_PASS } = process.env;
+const { ELASTIC_CLOUD_ID, ELASTIC_PASS } = process.env;
 
 @Injectable()
 export class SearchService
@@ -14,59 +14,58 @@ export class SearchService
     super(ConfigSearch.searchConfig(ELASTIC_CLOUD_ID, ELASTIC_PASS));
   }
 
-  public async insertIndex(bulkData: any): Promise<any> {
-    console.log('Object: ', JSON.stringify(bulkData));
+  async insertIndex(bulkData: any): Promise<any> {
     return await this.bulk(bulkData)
       .then((res) => res)
-      .catch((err) => {
-        console.log(err);
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR, {
-          cause: new Error('Insert Index Error'),
-        });
+      .catch((e) => {
+        throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
       });
   }
 
-  public async updateIndex(updateData: any): Promise<any> {
-    return await this.update(updateData)
-      .then((res) => res)
-      .catch((err) => {
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR, {
-          cause: new Error('Update Index Error'),
+  async updateIndex(updateData: any): Promise<any> {
+    try {
+      return await this.update(updateData)
+        .then((res) => res)
+        .catch((e) => {
+          throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         });
-      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  public async searchIndex(searchData: any): Promise<any> {
-    return await this.search(searchData)
-      .then((res) => {
-        // return res.body.hits.hits;
-        return res.hits.hits;
-      })
-      .catch((err) => {
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR, {
-          cause: new Error('Search Index Error'),
+  async searchIndex(searchData: any): Promise<any> {
+    try {
+      return await this.search(searchData)
+        .then((res) => {
+          // return res.body.hits.hits;
+          return res.hits.hits;
+        })
+        .catch((e) => {
+          throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
         });
-      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  public async deleteIndex(indexData: any): Promise<any> {
-    return await this.indices
-      .delete(indexData)
-      .then((res) => res)
-      .catch((err) => {
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR, {
-          cause: new Error('Delete Index Error'),
+  async deleteIndex(indexData: any): Promise<any> {
+    try {
+      return await this.indices
+        .delete(indexData)
+        .then((res) => res)
+        .catch(() => {
+          throw new HttpException(
+            'Record does not exist!',
+            HttpStatus.NOT_FOUND,
+          );
         });
-      });
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  public async deleteDocument(indexData: any): Promise<any> {
-    return await this.delete(indexData)
-      .then((res) => res)
-      .catch((err) => {
-        throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR, {
-          cause: new Error('Delete Document Error'),
-        });
-      });
+  deleteDocument(indexData: any): Promise<any> {
+    return Promise.resolve(undefined);
   }
 }

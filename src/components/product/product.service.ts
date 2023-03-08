@@ -1,16 +1,21 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { SearchServiceInterface } from '@services/search/interface/search.service.interface';
 import { ProductSearchObject } from '@components/product/model/product.search.object';
 import { PrismaService } from '@services/prisma/prisma.service';
 import { Product } from '@prisma/client';
+import { ProductServiceInterface } from '@components/product/interfaces/product.service.interface';
 
 @Injectable()
-export class ProductService {
+export class ProductService implements ProductServiceInterface {
   constructor(
     @Inject('SearchServiceInterface')
     private readonly searchService: SearchServiceInterface<any>,
     private prisma: PrismaService,
   ) {}
+
+  async findAll(): Promise<Product[] | null> {
+    return await this.prisma.product.findMany();
+  }
 
   async create(createProductDto: Product): Promise<Product> {
     return await this.prisma.product.create({
@@ -25,15 +30,18 @@ export class ProductService {
     });
   }
 
-  remove(id: number): Promise<Product> {
-    return this.prisma.product.delete({
-      where: { id: Number(id) },
-    });
+  async remove(id: number): Promise<Product | null> {
+    return this.prisma.product
+      .delete({
+        where: { id },
+      })
+      .catch((e) => {
+        throw new HttpException(e, HttpStatus.NOT_FOUND);
+      });
   }
 
-  public async search(q: any): Promise<any> {
+  async search(q: any): Promise<any> {
     const data = ProductSearchObject.searchObject(q);
-    console.log('search object: ', JSON.stringify(data));
     return await this.searchService.searchIndex(data);
   }
 }
