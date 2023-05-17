@@ -7,6 +7,8 @@ import { PrismaService } from '@services/prisma/prisma.service';
 import { APIPrefix } from '@constant/common';
 import { join } from 'path';
 import { json } from 'body-parser';
+import { config } from 'dotenv';
+config();
 
 const { NODE_ENV, PORT } = process.env;
 

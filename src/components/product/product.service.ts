@@ -14,17 +14,17 @@ export class ProductService implements ProductServiceInterface {
   ) {}
 
   async findAll(): Promise<Product[] | null> {
-    return await this.prisma.product.findMany();
+    return this.prisma.product.findMany();
   }
 
   async create(createProductDto: Product): Promise<Product> {
-    return await this.prisma.product.create({
+    return this.prisma.product.create({
       data: createProductDto,
     });
   }
 
   async update(id: number, updateProductDto: Product): Promise<Product> {
-    return await this.prisma.product.update({
+    return this.prisma.product.update({
       where: { id: Number(id) },
       data: updateProductDto,
     });

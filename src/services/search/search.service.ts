@@ -2,6 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { SearchServiceInterface } from './interface/search.service.interface';
 import { ConfigSearch } from './config/search.config';
+import { config } from 'dotenv';
+
+config();
 
 const { ELASTIC_CLOUD_ID, ELASTIC_PASS } = process.env;
 
@@ -65,7 +68,11 @@ export class SearchService
     }
   }
 
-  deleteDocument(indexData: any): Promise<any> {
-    return Promise.resolve(undefined);
+  async deleteDocument(indexData: any): Promise<any> {
+    try {
+      return await this.delete(indexData);
+    } catch (e) {
+      throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
